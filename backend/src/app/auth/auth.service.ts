@@ -17,22 +17,24 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const { email, password, name } = dto;
+    const { email, password, name, username } = dto;
 
     const existingEmail = await this.db.user.findUnique({ where: { email } });
     if (existingEmail) {
       throw new ConflictException('E-mail já vinculado em outra conta');
     }
 
-    const existingName = await this.db.user.findFirst({ where: { name } });
-    if (existingName) {
-      throw new ConflictException('Usuário já existe');
+    const existingUsername = await this.db.user.findUnique({
+      where: { username },
+    });
+    if (existingUsername) {
+      throw new ConflictException('Nome de usuário já existe');
     }
 
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = await this.db.user.create({
-        data: { email, password: hashedPassword, name },
+        data: { email, password: hashedPassword, name, username },
       });
       return this.generateToken(user);
     } catch (error) {
@@ -45,7 +47,7 @@ export class AuthService {
     try {
       const user = await this.db.user.findFirst({
         where: {
-          OR: [{ email: identifier }, { name: identifier }],
+          OR: [{ email: identifier }, { username: identifier }],
         },
       });
 
@@ -66,6 +68,8 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        username: user.username,
         name: user.name,
         role: user.role,
       },

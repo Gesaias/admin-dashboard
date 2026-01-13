@@ -10,6 +10,7 @@
     "backend:dev": "pnpm backend start:dev",
     "backend:build": "pnpm backend build",
     "backend:db:migrate": "pnpm backend db:migrate",
+    "backend:db:clean": "pnpm backend db:clean",
     "backend:db:seed": "pnpm backend db:seed",
     "backend:db:gen": "pnpm backend db:generate"
   }

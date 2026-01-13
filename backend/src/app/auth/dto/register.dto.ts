@@ -13,4 +13,13 @@ export class RegisterDto {
   @IsString({ message: 'O nome deve ser uma string' })
   @IsNotEmpty({ message: 'O nome é obrigatório' })
   name: string;
+
+  @IsString({ message: 'O nome de usuário deve ser uma string' })
+  @IsNotEmpty({ message: 'O nome de usuário é obrigatório' })
+  username: string;
+
+  @IsString({ message: 'O Role deve ser uma string' })
+  @IsNotEmpty({ message: 'O Role é obrigatório' })
+  // @IsEnum(Role)
+  role: string;
 }
