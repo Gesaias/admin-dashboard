@@ -1,9 +1,12 @@
 {
-  "name": "meu-projeto-fullstack",
+  "name": "admin-dashboard",
   "scripts": {
+    "i:all": "pnpm install",
+    "backend": "pnpm -F backend",
+    "frontend": "pnpm -F frontend",
+    "shared": "pnpm -F shared",
     "start:backend": "pnpm -F backend start:dev",
     "start:frontend": "pnpm -F frontend dev",
-    "install:all": "pnpm install",
     "prisma:generate": "pnpm -F backend prisma generate"
   }
 }
