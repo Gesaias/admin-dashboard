@@ -1,10 +1,10 @@
-import { Role } from '@prisma/client';
+import { Role } from '../../../src/generated/prisma/index.js';
 import { prisma } from './client.js';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 export async function userSeed() {
   const adminEmail = 'admin@admin.com';
-  const adminPassword = 'admin';
+  const adminPassword = 'admin123';
 
   console.log('   👤 Seeding admin user...');
 
