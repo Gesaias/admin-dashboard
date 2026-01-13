@@ -1,0 +1,12 @@
+{
+  "name": "admin-dashboard",
+  "scripts": {
+    "i:all": "pnpm install",
+    "backend": "pnpm -F backend",
+    "frontend": "pnpm -F frontend",
+    "shared": "pnpm -F shared",
+    "start:backend": "pnpm backend start:dev",
+    "start:frontend": "pnpm frontend dev",
+    "prisma:generate": "pnpm backend prisma generate"
+  }
+}
