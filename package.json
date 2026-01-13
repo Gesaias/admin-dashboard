@@ -1,0 +1,9 @@
+{
+  "name": "meu-projeto-fullstack",
+  "scripts": {
+    "start:backend": "pnpm -F backend start:dev",
+    "start:frontend": "pnpm -F frontend dev",
+    "install:all": "pnpm install",
+    "prisma:generate": "pnpm -F backend prisma generate"
+  }
+}
