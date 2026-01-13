@@ -7,6 +7,10 @@
     "shared": "pnpm -F shared",
     "start:backend": "pnpm backend start:dev",
     "start:frontend": "pnpm frontend dev",
-    "prisma:generate": "pnpm backend prisma generate"
+    "backend:dev": "pnpm backend start:dev",
+    "backend:build": "pnpm backend build",
+    "backend:db:migrate": "pnpm backend db:migrate",
+    "backend:db:seed": "pnpm backend db:seed",
+    "backend:db:gen": "pnpm backend db:generate"
   }
 }

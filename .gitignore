@@ -1,7 +1,9 @@
-# --- Dependências ---
-node_modules/
-.pnpm-debug.log*
-.pnpm-store/
+# --- Dependências (pnpm / npm / yarn) ---
+**/node_modules/
+**/.pnpm-store/
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
 
 # --- Artefatos de Build (Raiz e Subpastas) ---
 **/dist/
@@ -32,6 +34,7 @@ logs
 **/npm-debug.log*
 **/yarn-debug.log*
 **/yarn-error.log*
+**/.pnpm-debug.log*
 
 # --- Testes ---
 **/coverage
