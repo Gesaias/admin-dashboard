@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
@@ -16,9 +15,9 @@ export class DatabaseService
       connectionString: process.env.DATABASE_URL,
     });
 
-    const adapter = new (PrismaPg as any)(pool);
+    const adapter = new PrismaPg(pool);
 
-    super({ adapter } as any);
+    super({ adapter });
   }
 
   async onModuleInit() {

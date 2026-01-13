@@ -1,7 +1,21 @@
-// import { PrismaClient } from '@prisma/client';
+import { prisma, pool } from './client.js';
+import { userSeed } from './user.seed.js';
 
-// const prisma = new PrismaClient();
+async function main() {
+  console.log('🌱 Starting database seeding...');
 
-// async function main() {
+  try {
+    await userSeed();
 
-// }
+    console.log('🌱 Seeding process finished successfully.');
+  } catch (error) {
+    console.error('❌ Error during seeding process:', error);
+    process.exit(1);
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+main().finally(async () => {
+  await prisma.$disconnect();
+  await pool.end();
+});
