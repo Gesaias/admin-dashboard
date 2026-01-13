@@ -1,8 +1,13 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { DatabaseService } from '../../services/database/database.service.js';
 import { User } from '../../generated/prisma/index.js';
+import { RegisterDto } from './dto/register.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +16,19 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(email: string, password: string, name: string) {
+  async register(dto: RegisterDto) {
+    const { email, password, name } = dto;
+
+    const existingEmail = await this.db.user.findUnique({ where: { email } });
+    if (existingEmail) {
+      throw new ConflictException('E-mail já vinculado em outra conta');
+    }
+
+    const existingName = await this.db.user.findFirst({ where: { name } });
+    if (existingName) {
+      throw new ConflictException('Usuário já existe');
+    }
+
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = await this.db.user.create({
@@ -24,9 +41,14 @@ export class AuthService {
     }
   }
 
-  async login(email: string, password: string) {
+  async login(identifier: string, password: string) {
     try {
-      const user = await this.db.user.findUnique({ where: { email } });
+      const user = await this.db.user.findFirst({
+        where: {
+          OR: [{ email: identifier }, { name: identifier }],
+        },
+      });
+
       if (!user || !(await bcrypt.compare(password, user.password))) {
         throw new UnauthorizedException('Credenciais inválidas');
       }
