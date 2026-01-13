@@ -9,7 +9,6 @@
 **/dist/
 **/build/
 **/.nestjs/
-**/lib/
 *.tsbuildinfo
 
 # --- Variáveis de Ambiente (DADOS SENSÍVEIS) ---
