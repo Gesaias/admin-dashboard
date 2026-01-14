@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Role } from '../../../generated/prisma/index.js';
 
-export class RegisterDto {
+export class CreateUserDto {
   @IsEmail({}, { message: 'E-mail inválido' })
   @IsNotEmpty({ message: 'O e-mail é obrigatório' })
   email: string;
