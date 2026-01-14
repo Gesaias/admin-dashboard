@@ -31,7 +31,8 @@
     "db:validate": "pnpm prisma validate",
     "db:migrate": "pnpm prisma migrate dev",
     "db:clean": "pnpm prisma migrate reset --force",
-    "db:seed": "pnpm prisma db seed"
+    "db:seed": "pnpm prisma db seed",
+    "db:reset": "pnpm db:clean && pnpm db:seed"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
