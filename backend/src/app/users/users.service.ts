@@ -69,6 +69,15 @@ export class UsersService {
       .update({
         where: { id },
         data,
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       })
       .catch((error) => {
         if (isPrismaKnownRequestError(error) && error.code === 'P2025') {
@@ -86,6 +95,7 @@ export class UsersService {
         data: { password: data.hashedPassword },
         select: {
           id: true,
+          updatedAt: true,
         },
       })
       .catch((error) => {
@@ -98,12 +108,17 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    return this.db.user.delete({ where: { id } }).catch((error) => {
-      if (isPrismaKnownRequestError(error) && error.code === 'P2025') {
-        throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
-      }
+    return this.db.user
+      .delete({
+        where: { id },
+        select: { id: true, name: true, createdAt: true, updatedAt: true },
+      })
+      .catch((error) => {
+        if (isPrismaKnownRequestError(error) && error.code === 'P2025') {
+          throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+        }
 
-      throw new InternalServerErrorException('Erro ao deletar usuário');
-    });
+        throw new InternalServerErrorException('Erro ao deletar usuário');
+      });
   }
 }
