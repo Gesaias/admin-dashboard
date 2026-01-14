@@ -2,16 +2,16 @@
   "name": "admin-dashboard",
   "scripts": {
     "i:all": "pnpm install",
-    "backend": "pnpm -F backend",
-    "frontend": "pnpm -F frontend",
-    "shared": "pnpm -F shared",
-    "start:backend": "pnpm backend start:dev",
-    "start:frontend": "pnpm frontend dev",
-    "backend:dev": "pnpm backend start:dev",
-    "backend:build": "pnpm backend build",
-    "backend:db:migrate": "pnpm backend db:migrate",
-    "backend:db:clean": "pnpm backend db:clean",
-    "backend:db:seed": "pnpm backend db:seed",
-    "backend:db:gen": "pnpm backend db:generate"
+    "backend": "pnpm -F admin-dashboard-backend",
+    "frontend": "pnpm -F admin-dashboard-frontend",
+    "shared": "pnpm -F admin-dashboard-shared",
+    "start:frontend": "pnpm -F admin-dashboard-frontend dev",
+    "start:backend": "pnpm -F admin-dashboard-backend start:dev",
+    "backend:dev": "pnpm -F admin-dashboard-backend start:dev",
+    "backend:build": "pnpm -F admin-dashboard-backend build",
+    "backend:db:migrate": "pnpm -F admin-dashboard-backend db:migrate",
+    "backend:db:clean": "pnpm -F admin-dashboard-backend db:clean",
+    "backend:db:seed": "pnpm -F admin-dashboard-backend db:seed",
+    "backend:db:gen": "pnpm -F admin-dashboard-backend db:generate"
   }
 }
