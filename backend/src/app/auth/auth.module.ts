@@ -5,14 +5,22 @@ import { AuthService } from './auth.service.js';
 import { AuthController } from './auth.controller.js';
 import { DatabaseModule } from '../../services/database/database.module.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     DatabaseModule,
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '7d' },
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          expiresIn: (config.get<string | number>('JWT_EXPIRES_IN') ||
+            '7d') as any,
+        },
+      }),
     }),
   ],
   providers: [AuthService, JwtStrategy],
