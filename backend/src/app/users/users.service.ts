@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../services/database/database.service.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
@@ -34,6 +35,9 @@ export class UsersService {
   }
 
   async update(id: string, data: UpdateUserDto) {
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
     return await this.db.user.update({
       where: { id },
       data,
