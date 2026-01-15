@@ -1,99 +1,222 @@
-/** eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
+import { Controller, useForm } from "react-hook-form";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { toast } from "sonner";
+import { Session } from "next-auth";
+import { ApiError } from "../helpers/api-error";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { AxiosError } from "axios";
+import { Eye, EyeOff, LockKeyholeIcon, UserIcon } from "lucide-react";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+
+function isAxiosError(error: unknown): error is AxiosError {
+    return (error as AxiosError)?.isAxiosError === true;
+}
+
+function isApiError(error: unknown): error is ApiError {
+    return error instanceof ApiError;
+}
+
+const formSchema = z.object({
+    identifier: z.string().min(3, { message: "Informe um email ou nome de usuário válido" }),
+    password: z.string().min(6, { message: "A senha deve ter no mínimo 6 caracteres" }),
+});
 
 export default function LoginPage() {
-    const [identifier, setIdentifier] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const router = useRouter();
+    const [loading, setLoading] = useState<boolean>(false);
+    const [hidePassword, setHidePassword] = useState<boolean>(true);
+    const router: AppRouterInstance = useRouter();
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setErrorMessage(null);
-        setLoading(true);
+    const { control, formState, setError, handleSubmit, reset, } = useForm<z.infer<typeof formSchema>>({
+        defaultValues: {
+            identifier: "",
+            password: "",
+        },
+        mode: "onChange",
+        reValidateMode: "onChange",
+        resolver: zodResolver(formSchema),
+    });
 
-        // Use next-auth signIn with credentials provider. redirect:false so we handle navigation.
-        const res = await signIn("credentials", {
-            redirect: false,
-            identifier,
-            password,
-        });
+    async function onSubmit(data: z.infer<typeof formSchema>) {
+        try {
+            setLoading(true);
 
-        setLoading(false);
+            const res = await signIn("credentials", {
+                redirect: false,
+                ...data,
+            });
 
-        if (!res) {
-            setErrorMessage("Erro inesperado ao autenticar");
-            return;
-        }
+            setLoading(false);
 
-        // res may contain { error, status, ok, url }
-        if ((res as any).error) {
-            const status = (res as any).status;
-            if (status === 401 || status === 403) {
-                setErrorMessage("Credenciais inválidas");
-            } else if (status === 404) {
-                setErrorMessage("Serviço de autenticação não encontrado");
-            } else {
-                setErrorMessage("Erro ao fazer login");
+            if (!res || !res.ok) {
+                throw new ApiError(res?.status || 500, "Erro ao fazer login");
             }
-            return;
-        }
 
-        // Successful sign in
-        // retrieve session to access token/user provided by NextAuth callbacks
-        const session = await getSession();
-        if (session) {
-            if ((session as any).accessToken) {
-                localStorage.setItem("token", (session as any).accessToken);
+            const session: Session | null = await getSession();
+
+            if (session) {
+                if (session.access_token) {
+                    localStorage.setItem("token", session.access_token);
+                }
+
+                if (session.user) {
+                    localStorage.setItem("user", JSON.stringify(session.user));
+                }
             }
-            if (session.user) {
-                localStorage.setItem("user", JSON.stringify(session.user));
+
+            router.push("/dashboard");
+        } catch (error) {
+            let status = 500;
+            if (isAxiosError(error)) {
+                status = error.response?.status ?? 500;
+            } else if (isApiError(error)) {
+                status = error.status ?? 500;
+            }
+
+            const toastConfig = {
+                duration: 5000,
+                position: "top-right" as const,
+                closeButton: true,
+                richColors: true,
+                descriptionClassName: "text-sm text-white",
+                style: { backgroundColor: '#f87171', color: 'white' },
+            };
+
+            switch (status) {
+                case 401:
+                case 403:
+                    setError("identifier", { message: "Verifique seu usuário" });
+                    setError("password", { message: "Verifique sua senha" });
+
+                    toast.error("Acesso Negado", {
+                        description: "Usuário/Email ou senha incorretos.",
+                        ...toastConfig,
+                    });
+                    break;
+
+                case 404:
+                    toast.error("Erro de Conexão", {
+                        description: "O serviço de login está temporariamente fora do ar.",
+                        ...toastConfig,
+                    });
+                    break;
+
+                default:
+                    toast.error("Erro Inesperado", {
+                        description: "Tente novamente mais tarde.",
+                        ...toastConfig,
+                    });
+                    break;
             }
         }
-        router.push("/dashboard");
-    };
+    }
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <Card className="w-96">
                 <CardHeader>
                     <CardTitle>Login</CardTitle>
+                    <CardDescription>
+                        Entre com suas credenciais para acessar o sistema.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleLogin} className="space-y-4">
-                        <Input
-                            type="text"
-                            placeholder="Email"
-                            value={identifier}
-                            onChange={(e) => setIdentifier(e.target.value)}
-                        />
-                        <Input
-                            type="password"
-                            placeholder="Senha"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                    <form id={'form-login-form-inputs-fields'} onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                        <FieldGroup>
+                            <Controller
+                                control={control}
+                                name="identifier"
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="form-login-identifier-field">
+                                            Email/Usuário
+                                        </FieldLabel>
+                                        <InputGroup>
+                                            <InputGroupAddon align={'inline-start'}>
+                                                <UserIcon />
+                                            </InputGroupAddon>
+                                            <InputGroupInput
+                                                {...field}
+                                                id="form-login-identifier-field"
+                                                type="text"
+                                                placeholder="Entre com seu email ou nome de usuário"
+                                                aria-invalid={fieldState.invalid}
+                                                autoComplete="off"
+                                                disabled={loading}
+                                            />
+                                        </InputGroup>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
+                            <Controller
+                                control={control}
+                                name="password"
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="form-login-password-field">
+                                            Senha
+                                        </FieldLabel>
+                                        <InputGroup>
+                                            <InputGroupAddon align={'inline-start'}>
+                                                <LockKeyholeIcon />
+                                            </InputGroupAddon>
+                                            <InputGroupInput
+                                                {...field}
+                                                id="form-login-password-field"
+                                                type={hidePassword ? "password" : "text"}
+                                                placeholder="Entre com sua senha"
+                                                aria-invalid={fieldState.invalid}
+                                                autoComplete="off"
+                                                disabled={loading}
+                                            />
+                                            <InputGroupAddon aria-invalid={fieldState.invalid} align={'inline-end'} className="cursor-pointer" onClick={() => setHidePassword(!hidePassword)}>
+                                                {
+                                                    hidePassword ? (
+                                                        <EyeOff className="cursor-pointer" />
+                                                    ) : (
+                                                        <Eye className="cursor-pointer" />
+                                                    )
+                                                }
+                                            </InputGroupAddon>
+                                        </InputGroup>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
+                        </FieldGroup>
+                    </form>
+                </CardContent>
+                <CardFooter>
+                    <Field orientation={'horizontal'} className="w-full flex justify-between">
+                        <Button
+                            type={'button'}
+                            variant={'outline'}
+                            disabled={loading ? loading : !formState.isDirty}
+                            onClick={() => reset()}>
+                            Limpar
+                        </Button>
                         <Button
                             type="submit"
-                            className="w-full"
-                            disabled={loading}
+                            form="form-login-form-inputs-fields"
+                            disabled={loading ? loading : !formState.isValid}
                         >
                             {loading ? "Entrando..." : "Entrar"}
                         </Button>
-                        {errorMessage && (
-                            <div className="text-sm text-red-600 mt-2">
-                                {errorMessage}
-                            </div>
-                        )}
-                    </form>
-                </CardContent>
+                    </Field>
+                </CardFooter>
             </Card>
         </div>
     );
