@@ -61,7 +61,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-1 px-3 space-y-1">
+                    <nav className="flex-1 flex flex-col px-3 gap-1">
                         {NAV_ITEMS.map((item) => {
                             const isActive = pathname === item.href;
                             const Icon = item.icon;
