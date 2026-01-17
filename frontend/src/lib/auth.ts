@@ -3,6 +3,7 @@ import { BACKEND_LOGIN_URL } from "@/constants/Auth";
 import { type NextAuthOptions } from "next-auth";
 import { AdapterUser } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { UserRole } from "../../enums/user-role";
 
 export const authOptions: NextAuthOptions = {
     session: {
@@ -67,7 +68,7 @@ export const authOptions: NextAuthOptions = {
                 access_token: string;
                 username: string;
                 name: string;
-                role: string;
+                role: UserRole;
             };
 
             const customUser = user as CustomUser;
