@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, HttpStatus, HttpCode } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
@@ -13,6 +13,7 @@ export class AuthController {
 
   @Roles(Role.ADMIN, Role.MANAGER)
   @Post('register')
+  @HttpCode(HttpStatus.CREATED)
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
