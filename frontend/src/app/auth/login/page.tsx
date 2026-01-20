@@ -1,62 +1,23 @@
 "use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Button } from "@/components/ui/button";
 import {
     Card,
     CardHeader,
     CardTitle,
     CardContent,
     CardDescription,
-    CardFooter,
 } from "@/components/ui/card";
-import { Controller, useForm } from "react-hook-form";
-import {
-    Field,
-    FieldError,
-    FieldGroup,
-    FieldLabel,
-} from "@/components/ui/field";
-import { toast } from "sonner";
-import { AxiosError } from "axios";
-import { Eye, EyeOff, LockKeyholeIcon, UserIcon } from "lucide-react";
-import {
-    InputGroup,
-    InputGroupAddon,
-    InputGroupInput,
-} from "@/components/ui/input-group";
+import { LoginForm } from "@/components/auth/login-form";
+import { handleApiError } from "@/lib/notifications";
+import * as z from "zod";
 import { formSchema } from "./schema";
-import { ApiError } from "@/app/helpers/api-error";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-
-function isAxiosError(error: unknown): error is AxiosError {
-    return (error as AxiosError)?.isAxiosError === true;
-}
-
-function isApiError(error: unknown): error is ApiError {
-    return error instanceof ApiError;
-}
 
 export default function LoginPage() {
     const [loading, setLoading] = useState<boolean>(false);
-    const [hidePassword, setHidePassword] = useState<boolean>(true);
-    const router: AppRouterInstance = useRouter();
-
-    const { control, formState, setError, handleSubmit, reset } = useForm<
-        z.infer<typeof formSchema>
-    >({
-        defaultValues: {
-            identifier: "",
-            password: "",
-        },
-        mode: "onChange",
-        reValidateMode: "onChange",
-        criteriaMode: "all",
-        resolver: zodResolver(formSchema),
-    });
+    const router = useRouter();
 
     async function onSubmit(data: z.infer<typeof formSchema>) {
         try {
@@ -68,331 +29,48 @@ export default function LoginPage() {
                 ...data,
             });
 
-            setLoading(false);
-
             if (!res || !res.ok) {
-                throw new ApiError(res?.status || 500, "Erro ao fazer login");
+                // NextAuth wraps errors, so we handle the 401/403 specifically if needed
+                if (res?.error === "CredentialsSignin") {
+                    throw new Error("Usuário ou senha incorretos.");
+                }
+                throw new Error(res?.error || "Erro ao fazer login");
             }
 
             router.push("/dashboard");
         } catch (error) {
-            let status = 500;
-            if (isAxiosError(error)) {
-                status = error.response?.status ?? 500;
-            } else if (isApiError(error)) {
-                status = error.status ?? 500;
-            }
-
-            const toastConfig = {
-                duration: 5000,
-                position: "top-right" as const,
-                closeButton: true,
-                richColors: true,
-                descriptionClassName: "text-sm text-white",
-                style: { backgroundColor: "#f87171", color: "white" },
-            };
-
-            switch (status) {
-                case 401:
-                case 403:
-                    setError("identifier", {
-                        message: "Verifique seu usuário",
-                    });
-                    setError("password", { message: "Verifique sua senha" });
-
-                    toast.error("Acesso Negado", {
-                        description: "Usuário/Email ou senha incorretos.",
-                        ...toastConfig,
-                    });
-                    break;
-
-                case 404:
-                    toast.error("Erro de Conexão", {
-                        description:
-                            "O serviço de login está temporariamente fora do ar.",
-                        ...toastConfig,
-                    });
-                    break;
-
-                default:
-                    toast.error("Erro Inesperado", {
-                        description: "Tente novamente mais tarde.",
-                        ...toastConfig,
-                    });
-                    break;
-            }
+            handleApiError(error, "Erro ao acessar o sistema");
+        } finally {
+            setLoading(false);
         }
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <Card className="w-96">
-                <CardHeader>
-                    <CardTitle>Login</CardTitle>
-                    <CardDescription>
-                        Entre com suas credenciais para acessar o sistema.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form
-                        id={"form-login-form-inputs-fields"}
-                        onSubmit={handleSubmit(onSubmit)}
-                        className="space-y-4"
-                    >
-                        <FieldGroup>
-                            <Controller
-                                control={control}
-                                name="identifier"
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="form-login-identifier-field">
-                                            Email/Usuário
-                                        </FieldLabel>
-                                        <InputGroup>
-                                            <InputGroupAddon
-                                                align={"inline-start"}
-                                            >
-                                                <UserIcon />
-                                            </InputGroupAddon>
-                                            <InputGroupInput
-                                                {...field}
-                                                id="form-login-identifier-field"
-                                                type="text"
-                                                placeholder="Entre com seu email ou nome de usuário"
-                                                aria-invalid={
-                                                    fieldState.invalid
-                                                }
-                                                autoComplete="off"
-                                                disabled={loading}
-                                            />
-                                        </InputGroup>
-                                        {fieldState.error && (
-                                            <div className="flex flex-col error-container gap-1">
-                                                {fieldState.error.types ? (
-                                                    Object.entries(
-                                                        fieldState.error.types,
-                                                    ).map(
-                                                        ([type, messages]) => {
-                                                            const messagesArray =
-                                                                (
-                                                                    Array.isArray(
-                                                                        messages,
-                                                                    )
-                                                                        ? messages
-                                                                        : [
-                                                                              messages,
-                                                                          ]
-                                                                ).filter(
-                                                                    (
-                                                                        msg,
-                                                                    ): msg is string =>
-                                                                        typeof msg ===
-                                                                        "string",
-                                                                );
+        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950 p-4">
+            <div className="w-full max-w-[420px] space-y-8 animate-in fade-in zoom-in duration-500">
+                <div className="flex flex-col items-center gap-2 mb-2">
+                    <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                        <span className="text-white font-black text-2xl tracking-tighter">AD</span>
+                    </div>
+                    <h1 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Admin Dashboard</h1>
+                </div>
 
-                                                            return messagesArray.map(
-                                                                (
-                                                                    msg,
-                                                                    index,
-                                                                ) => (
-                                                                    <div
-                                                                        key={`${type}-${index}`}
-                                                                        className="flex items-center gap-1.5"
-                                                                    >
-                                                                        <span
-                                                                            className={
-                                                                                "text-black text-[10px]"
-                                                                            }
-                                                                        >
-                                                                            •
-                                                                        </span>
+                <Card className="border-none shadow-2xl shadow-slate-200/50 dark:shadow-none bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+                    <CardHeader className="space-y-1 pb-6 text-center">
+                        <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-50">Bem-vindo de volta</CardTitle>
+                        <CardDescription className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                            Entre com suas credenciais para acessar o painel
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <LoginForm onSubmit={onSubmit} loading={loading} />
+                    </CardContent>
+                </Card>
 
-                                                                        <FieldError
-                                                                            errors={[
-                                                                                {
-                                                                                    message:
-                                                                                        msg,
-                                                                                },
-                                                                            ]}
-                                                                        />
-                                                                    </div>
-                                                                ),
-                                                            );
-                                                        },
-                                                    )
-                                                ) : (
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="text-black text-[10px]">
-                                                            •
-                                                        </span>
-                                                        <FieldError
-                                                            errors={[
-                                                                {
-                                                                    message:
-                                                                        fieldState
-                                                                            .error
-                                                                            .message,
-                                                                },
-                                                            ]}
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </Field>
-                                )}
-                            />
-                            <Controller
-                                control={control}
-                                name="password"
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="form-login-password-field">
-                                            Senha
-                                        </FieldLabel>
-                                        <InputGroup>
-                                            <InputGroupAddon
-                                                align={"inline-start"}
-                                            >
-                                                <LockKeyholeIcon />
-                                            </InputGroupAddon>
-                                            <InputGroupInput
-                                                {...field}
-                                                id="form-login-password-field"
-                                                type={
-                                                    hidePassword
-                                                        ? "password"
-                                                        : "text"
-                                                }
-                                                placeholder="Entre com sua senha"
-                                                aria-invalid={
-                                                    fieldState.invalid
-                                                }
-                                                autoComplete="off"
-                                                disabled={loading}
-                                            />
-                                            <InputGroupAddon
-                                                aria-invalid={
-                                                    fieldState.invalid
-                                                }
-                                                align={"inline-end"}
-                                                className="cursor-pointer"
-                                                onClick={() =>
-                                                    setHidePassword(
-                                                        !hidePassword,
-                                                    )
-                                                }
-                                            >
-                                                {hidePassword ? (
-                                                    <EyeOff className="cursor-pointer" />
-                                                ) : (
-                                                    <Eye className="cursor-pointer" />
-                                                )}
-                                            </InputGroupAddon>
-                                        </InputGroup>
-
-                                        {fieldState.error && (
-                                            <div className="flex flex-col error-container gap-1">
-                                                {fieldState.error.types ? (
-                                                    Object.entries(
-                                                        fieldState.error.types,
-                                                    ).map(
-                                                        ([type, messages]) => {
-                                                            const messagesArray =
-                                                                (
-                                                                    Array.isArray(
-                                                                        messages,
-                                                                    )
-                                                                        ? messages
-                                                                        : [
-                                                                              messages,
-                                                                          ]
-                                                                ).filter(
-                                                                    (
-                                                                        msg,
-                                                                    ): msg is string =>
-                                                                        typeof msg ===
-                                                                        "string",
-                                                                );
-
-                                                            return messagesArray.map(
-                                                                (
-                                                                    msg,
-                                                                    index,
-                                                                ) => (
-                                                                    <div
-                                                                        key={`${type}-${index}`}
-                                                                        className="flex items-center gap-1.5"
-                                                                    >
-                                                                        <span
-                                                                            className={
-                                                                                "text-black text-[10px]"
-                                                                            }
-                                                                        >
-                                                                            •
-                                                                        </span>
-
-                                                                        <FieldError
-                                                                            errors={[
-                                                                                {
-                                                                                    message:
-                                                                                        msg,
-                                                                                },
-                                                                            ]}
-                                                                        />
-                                                                    </div>
-                                                                ),
-                                                            );
-                                                        },
-                                                    )
-                                                ) : (
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="text-black text-[10px]">
-                                                            •
-                                                        </span>
-                                                        <FieldError
-                                                            errors={[
-                                                                {
-                                                                    message:
-                                                                        fieldState
-                                                                            .error
-                                                                            .message,
-                                                                },
-                                                            ]}
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </Field>
-                                )}
-                            />
-                        </FieldGroup>
-                    </form>
-                </CardContent>
-                <CardFooter>
-                    <Field
-                        orientation={"horizontal"}
-                        className="w-full flex justify-between"
-                    >
-                        <Button
-                            type={"button"}
-                            variant={"outline"}
-                            disabled={loading ? loading : !formState.isDirty}
-                            onClick={() => reset()}
-                        >
-                            Limpar
-                        </Button>
-                        <Button
-                            type="submit"
-                            form="form-login-form-inputs-fields"
-                            disabled={loading ? loading : !formState.isValid}
-                        >
-                            {loading ? "Entrando..." : "Entrar"}
-                        </Button>
-                    </Field>
-                </CardFooter>
-            </Card>
+                <p className="text-center text-xs text-slate-400 dark:text-slate-600 font-medium tracking-wide">
+                    © {new Date().getFullYear()} Admin Dashboard — Todos os direitos reservados.
+                </p>
+            </div>
         </div>
     );
 }
