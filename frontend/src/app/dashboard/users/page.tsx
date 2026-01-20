@@ -33,14 +33,18 @@ export default function UsersPage() {
     const [detailOpen, setDetailOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
+    const [tableLoading, setTableLoading] = useState(true);
 
     const loadUsers = async () => {
         try {
+            setTableLoading(true);
             const { data } = await api.get("/users");
             setUsers(data);
         } catch (error) {
             console.error("Erro ao carregar usuários:", error);
             handleApiError(error, "Erro ao carregar usuários");
+        } finally {
+            setTableLoading(false);
         }
     };
 
@@ -192,7 +196,7 @@ export default function UsersPage() {
                 ]}
             />
 
-            <div className="flex flex-col items-start justify-between">
+            <div className="flex flex-col items-start justify-between w-full">
                 <CreateUserDialog
                     open={createOpen}
                     onOpenChange={setCreateOpen}
@@ -223,6 +227,7 @@ export default function UsersPage() {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onDetail={handleDetail}
+                    loading={tableLoading}
                 />
             </div>
         </div>
