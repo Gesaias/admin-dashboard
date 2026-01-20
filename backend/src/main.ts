@@ -19,6 +19,7 @@ async function bootstrap() {
     .setDescription('API Admin Dashboard')
     .setVersion('0.0.1')
     .addTag('Api')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -36,4 +37,6 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3001);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error(err);
+});

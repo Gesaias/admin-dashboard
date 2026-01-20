@@ -8,6 +8,7 @@ import { AuthModule } from './app/auth/auth.module.js';
 import { UsersModule } from './app/users/users.module.js';
 import { JwtAuthGuard } from './app/auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from './app/auth/guards/roles.guard.js';
+import { ProductsModule } from './app/products/products.module.js';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { RolesGuard } from './app/auth/guards/roles.guard.js';
     DatabaseModule,
     AuthModule,
     UsersModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [
