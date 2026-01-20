@@ -18,7 +18,7 @@ export async function proxy(req: NextRequest) {
         return NextResponse.next();
     }
 
-    if (isAuthPage && token) {
+    if (isAuthPage && token && token.user && !token.user.suspended) {
         return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     

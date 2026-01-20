@@ -3,6 +3,15 @@ import axios from "axios";
 import { toast } from "sonner";
 import { getSession, signOut } from "next-auth/react";
 
+const toastErrorConfig = {
+        duration: 5000,
+        position: "top-right" as const,
+        closeButton: true,
+        richColors: true,
+        descriptionClassName: "text-sm text-white",
+        style: { backgroundColor: "#f87171", color: "white" },
+    };
+
 const api = axios.create({
     baseURL: "http://localhost:3001",
 });
@@ -36,25 +45,19 @@ api.interceptors.response.use(
         if (isLoginEndpoint) {
             toast.error("Credenciais inválidas", {
                 description: "Usuário/Email ou senha inválidos",
-                closeButton: true,
-                duration: 5000,
+                ...toastErrorConfig,
             });
             return Promise.reject(error);
         }
 
         if (status === 401) {
-            // Only treat 401 as expired session
-            // localStorage.removeItem('token');
-            // localStorage.removeItem('user');
-            // window.location.href = '/auth/login';
             signOut({
                 redirect: true,
                 callbackUrl: "/auth/login",
             }).then(() => {
                 toast.error("Sessão expirada", {
                     description: "Faça login novamente para continuar",
-                    closeButton: true,
-                    duration: 5000,
+                    ...toastErrorConfig,
                 });
             });
             return Promise.reject(error);
@@ -65,19 +68,16 @@ api.interceptors.response.use(
                 description:
                     response?.data?.message ||
                     "O recurso solicitado não existe.",
-                closeButton: true,
-                duration: 5000,
+                ...toastErrorConfig,
             });
             return Promise.reject(error);
         }
 
         if (!response) {
-            // Network or CORS error
             toast.error("Erro de conexão", {
                 description:
                     "Falha ao conectar ao servidor. Verifique sua conexão.",
-                closeButton: true,
-                duration: 5000,
+                ...toastErrorConfig,
             });
             return Promise.reject(error);
         }
