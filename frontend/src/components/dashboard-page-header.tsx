@@ -3,14 +3,14 @@ import { Button, buttonVariants } from "./ui/button";
 import { VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-interface Action extends VariantProps<typeof buttonVariants> {
+export interface Action extends VariantProps<typeof buttonVariants> {
     label: string;
     icon: ReactNode;
     onClick: () => void;
     className?: string;
 }
 
-interface DashboardPageHeaderProps {
+export interface DashboardPageHeaderProps {
     title: string;
     description: string;
     actions?: Action[];
@@ -22,7 +22,7 @@ export default function DashboardPageHeader({
     actions
 }: DashboardPageHeaderProps): JSX.Element {
     return (
-        <div className="w-full flex flex-col justify-between items-center md:flex-row gap-4 mb-6">
+        <div className="w-full flex flex-col justify-between items-start lg:flex-row gap-4 mb-6">
             <div>
                 <h1 className="text-2xl font-bold">{title}</h1>
                 <p className="text-gray-500">{description}</p>

@@ -36,6 +36,7 @@ import {
 } from "./ui/dropdown-menu";
 import { signOut, useSession } from "next-auth/react";
 import { Separator } from "@radix-ui/react-separator";
+import { Badge } from "./ui/badge";
 
 export const menuItems = [
     {
@@ -139,12 +140,16 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <SidebarMenuButton className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group">
-                                    <div className="flex items-center gap-2">
+                                <SidebarMenuButton className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group h-fit">
+                                    <div className="flex items-center gap-2 w-full">
                                         <User2 />
-                                        <span className="font-medium text-sm">
-                                            {session?.user?.name}
-                                        </span>
+                                        {
+                                            isOpen && (
+                                                <span className="font-medium text-sm truncate">
+                                                    {session?.user?.name}
+                                                </span>
+                                            )
+                                        }
                                     </div>
                                     <ChevronUp className="ml-auto" />
                                 </SidebarMenuButton>
