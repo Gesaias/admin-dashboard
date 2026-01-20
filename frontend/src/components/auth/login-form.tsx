@@ -42,7 +42,7 @@ export function LoginForm({ onSubmit, loading }: LoginFormProps) {
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6"
         >
-            <FieldGroup className="space-y-4">
+            <FieldGroup>
                 <Controller
                     control={control}
                     name="identifier"
@@ -61,7 +61,7 @@ export function LoginForm({ onSubmit, loading }: LoginFormProps) {
                                     type="text"
                                     placeholder="seu@email.com ou username"
                                     disabled={loading}
-                                    className="h-11 shadow-sm transition-all focus:ring-2 focus:ring-blue-500/20"
+                                    className="h-11 transition-all focus:ring-2 focus:ring-blue-500/20"
                                 />
                             </InputGroup>
                             <FormError fieldState={fieldState} />
@@ -87,7 +87,7 @@ export function LoginForm({ onSubmit, loading }: LoginFormProps) {
                                     type={hidePassword ? "password" : "text"}
                                     placeholder="••••••••"
                                     disabled={loading}
-                                    className="h-11 shadow-sm transition-all focus:ring-2 focus:ring-blue-500/20"
+                                    className="h-11 transition-all focus:ring-2 focus:ring-blue-500/20"
                                 />
                                 <InputGroupAddon
                                     align="inline-end"
