@@ -1,11 +1,13 @@
 import { prisma, pool } from './client.js';
 import { userSeed } from './user.seed.js';
+import { systemConfigSeed } from './system-config.seed.js';
 
 async function main() {
   console.log('🌱 Starting database seeding...');
 
   try {
     await userSeed();
+    await systemConfigSeed();
 
     console.log('🌱 Seeding process finished successfully.');
   } catch (error) {

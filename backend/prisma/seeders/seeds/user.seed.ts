@@ -26,6 +26,7 @@ export async function userSeed() {
       name: 'Administrator',
       password: hashedPassword,
       role: Role.ADMIN,
+      suspended: false,
     },
   });
 

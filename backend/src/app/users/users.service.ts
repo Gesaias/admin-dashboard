@@ -27,6 +27,7 @@ export class UsersService {
           name: true,
           email: true,
           role: true,
+          suspended: true,
           createdAt: true,
         },
       })
@@ -45,6 +46,7 @@ export class UsersService {
           name: true,
           email: true,
           role: true,
+          suspended: true,
           createdAt: true,
         },
       })
@@ -77,6 +79,7 @@ export class UsersService {
           role: true,
           createdAt: true,
           updatedAt: true,
+          suspended: true,
         },
       })
       .catch((error) => {

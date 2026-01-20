@@ -7,6 +7,7 @@ import { DatabaseModule } from '../../services/database/database.module.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service.js';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -23,7 +24,25 @@ import { UsersService } from '../users/users.service.js';
         },
       }),
     }),
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          host: config.get('SMTP_HOST'),
+          port: Number(config.get('SMTP_PORT')),
+          secure: String(config.get('SMTP_SECURE')) === 'true',
+          auth: {
+            user: config.get('SMTP_USER'),
+            pass: config.get('SMTP_PASS'),
+          },
+        },
+        defaults: {
+          from: `"No Reply" <${config.get('SMTP_FROM')}>`,
+        },
+      }),
+    }),
   ],
+
   providers: [AuthService, JwtStrategy, UsersService],
   controllers: [AuthController],
   exports: [AuthService],
