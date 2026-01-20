@@ -9,19 +9,22 @@ import {
 import { UserForm } from "./user-form";
 import z from "zod";
 import { formSchema } from "@/app/dashboard/users/schema";
+import { User as UserCustom } from "@/types/user";
 
 interface CreateUserDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSubmit: (data: z.infer<typeof formSchema>) => Promise<void>;
     loading?: boolean;
+    userLogged: UserCustom;
 }
 
 export function CreateUserDialog({
     open,
     onOpenChange,
     onSubmit,
-    loading
+    loading,
+    userLogged,
 }: CreateUserDialogProps) {
     const handleCancel = () => {
         onOpenChange(false);
@@ -41,6 +44,7 @@ export function CreateUserDialog({
                     onSubmit={handleSubmit}
                     onCancel={handleCancel}
                     loading={loading}
+                    userLogged={userLogged}
                 />
             </DialogContent>
         </Dialog>

@@ -6,4 +6,5 @@ export type User = {
     email: string;
     username: string;
     role: UserRole;
+    suspended: boolean;
 };

@@ -7,6 +7,7 @@ declare module "next-auth" {
     id: string;
     username?: string;
     role?: UserRole;
+    suspended: boolean;
   }
 
   interface Session {
@@ -25,6 +26,7 @@ declare module "next-auth/jwt" {
       name?: string | null;
       username?: string;
       role?: UserRole;
+      suspended: boolean;
     } & DefaultJWT;
   }
 }

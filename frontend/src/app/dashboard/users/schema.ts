@@ -12,22 +12,24 @@ const usernameSchema = z
 
 const passwordSchema = z
     .string()
-    .min(6, "A senha deve ter no mínimo 6 caracteres")
     .max(100, "Senha muito longa")
+    .refine((value) => value === "" || value.length >= 6, {
+        message: "A senha deve ter no mínimo 6 caracteres",
+    })
     // Verifica se tem ao menos uma letra maiúscula
-    .refine((value) => /[A-Z]/.test(value), {
+    .refine((value) => value === "" || /[A-Z]/.test(value), {
         message: "A senha deve conter pelo menos uma letra maiúscula",
     })
     // Verifica se tem ao menos uma letra minúscula
-    .refine((value) => /[a-z]/.test(value), {
+    .refine((value) => value === "" || /[a-z]/.test(value), {
         message: "A senha deve conter pelo menos uma letra minúscula",
     })
     // Verifica se tem ao menos um número
-    .refine((value) => /[0-9]/.test(value), {
+    .refine((value) => value === "" || /[0-9]/.test(value), {
         message: "A senha deve conter pelo menos um número",
     })
     // Verifica se tem ao menos um caractere especial
-    .refine((value) => /[^A-Za-z0-9]/.test(value), {
+    .refine((value) => value === "" || /[^A-Za-z0-9]/.test(value), {
         message:
             "A senha deve conter pelo menos um caractere especial (@, #, $, etc.)",
     });
