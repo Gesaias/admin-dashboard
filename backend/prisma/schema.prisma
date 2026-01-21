@@ -23,7 +23,8 @@ model User {
   suspended      Boolean         @default(false)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
-  products       Product[]
+  productsCreated  Product[] @relation("ProductCreator")
+  productsUpdated  Product[] @relation("ProductUpdater")
   passwordResets PasswordReset[]
 }
 
@@ -56,8 +57,13 @@ model Product {
   price       Float
   stock       Int
   category    String
+
+  createdBy   String?
+  createdByUser User?  @relation("ProductCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  
+  updatedBy   String?
+  updatedByUser User?  @relation("ProductUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
 }
