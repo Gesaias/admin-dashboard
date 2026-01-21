@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from '../../../generated/prisma/index.js';
+import { Role, User } from '../../../generated/prisma/index.js';
 import { ROLES_KEY } from '../decorators/roles.decorator.js';
 
 @Injectable()
@@ -17,10 +17,8 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { user } = context.switchToHttp().getRequest();
+    const { user }: { user: User } = context.switchToHttp().getRequest();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return requiredRoles.some((role) => user?.role === role);
+    return requiredRoles.some((role) => user.role === role);
   }
 }
